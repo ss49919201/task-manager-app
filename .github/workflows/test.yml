@@ -5,8 +5,7 @@ on:
   pull_request:
     branches: [ main ]
 jobs:
-  golangci-lint:
-    name: runner / golangci-lint
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go
@@ -16,3 +15,6 @@ jobs:
 
       - name: Build
         run: go build -v ./...
+
+      - name: Test
+        run: go test -v ./...
