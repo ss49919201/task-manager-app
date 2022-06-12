@@ -9,7 +9,7 @@ jobs:
     name: runner / golangci-lint
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code into the Go module directory
+      - name: check out
         uses: actions/checkout@v2
 
       - name: golangci-lint
