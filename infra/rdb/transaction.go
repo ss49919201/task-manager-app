@@ -7,7 +7,7 @@ import (
 )
 
 type Transaction interface {
-	Do(ctx context.Context, f func()) error
+	Do(ctx context.Context, f func() error) error
 }
 
 type transaction struct {
