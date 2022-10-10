@@ -9,7 +9,12 @@ import (
 )
 
 func NewDB() (*xorm.Engine, error) {
-	return xorm.NewEngine("mysql", getDataSourceName())
+	engine, err := xorm.NewEngine("mysql", getDataSourceName())
+	if err != nil {
+		return nil, err
+	}
+	// TODO: Configure connection pool
+	return engine, nil
 }
 
 func getDataSourceName() string {
