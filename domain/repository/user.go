@@ -11,6 +11,8 @@ import (
 
 type User interface {
 	Save(ctx context.Context, user *domain.User) error
+	SaveWithTx(ctx context.Context, user *domain.User) error
+
 	GetOne(ctx context.Context, userID domain.UserID) (*domain.User, error)
 }
 
@@ -18,7 +20,7 @@ type user struct {
 	db *xorm.Engine
 }
 
-func NewUser(db *xorm.Engine) User {
+func NewUser(db *xorm.Engine) *user {
 	return &user{
 		db: db,
 	}
@@ -35,26 +37,36 @@ func (t *UserDTO) TableName() string {
 	return "users"
 }
 
-func (t *user) Save(ctx context.Context, user *domain.User) error {
+func (u *user) Save(ctx context.Context, user *domain.User) error {
+	session := u.db.NewSession().Context(ctx)
+	return u.save(session, user)
+}
+
+func (u *user) SaveWithTx(ctx context.Context, user *domain.User) error {
+	// TODO: トランザクションの実装
+	return nil
+}
+
+func (u *user) save(session *xorm.Session, user *domain.User) error {
 	userDTO := &UserDTO{
 		ID:        user.ID().String(),
 		Name:      user.Name(),
 		UpdatedAt: time.Now(),
 	}
 
-	exists, err := t.db.Table(userDTO.TableName()).Where("id = ?", userDTO.ID).Exist()
+	exists, err := session.Table(userDTO.TableName()).Where("id = ?", userDTO.ID).Exist()
 	if err != nil {
 		return xerrors.Errorf("%v", err)
 	}
 
 	if exists {
-		_, err := t.db.ID(userDTO.ID).Update(userDTO)
+		_, err := session.ID(userDTO.ID).Update(userDTO)
 		if err != nil {
 			return xerrors.Errorf("%v", err)
 		}
 	} else {
 		userDTO.CreatedAt = userDTO.UpdatedAt
-		_, err := t.db.Insert(userDTO)
+		_, err := session.Insert(userDTO)
 		if err != nil {
 			return xerrors.Errorf("%v", err)
 		}
@@ -63,9 +75,10 @@ func (t *user) Save(ctx context.Context, user *domain.User) error {
 	return nil
 }
 
-func (t *user) GetOne(ctx context.Context, userID domain.UserID) (*domain.User, error) {
+func (u *user) GetOne(ctx context.Context, userID domain.UserID) (*domain.User, error) {
+	session := u.db.NewSession().Context(ctx)
 	userDTO := UserDTO{ID: userID.String()}
-	has, err := t.db.Get(&userDTO)
+	has, err := session.Get(&userDTO)
 	if err != nil {
 		return nil, err
 	}
