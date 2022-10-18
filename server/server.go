@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"os"
 
@@ -13,9 +14,9 @@ import (
 )
 
 func Start() error {
-	address := os.Getenv("HOST")
+	host := os.Getenv("HOST")
 	port := os.Getenv("PORT")
-	return http.ListenAndServe(address+":"+port, nil)
+	return http.ListenAndServe(net.JoinHostPort(host, port), nil)
 }
 
 func UsecaseMiddlewarefunc(f http.HandlerFunc) http.HandlerFunc {
