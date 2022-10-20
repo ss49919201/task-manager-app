@@ -16,6 +16,8 @@ services:
       - ./docker/db/data:/var/lib/mysql
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
       - ./mysql/transaction.ddl:/var/ddl/transaction.ddl
+      - ./mysql/master.ddl:/var/ddl/master.ddl
+      - ./mysql/master.dml:/var/dml/master.dml
       - ./script:/var/script
     ports:
       - 3306:3306
