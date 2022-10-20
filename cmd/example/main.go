@@ -18,6 +18,10 @@ func init() {
 	}
 }
 
+func exec[T any](fn func() (T, error)) {
+	// TODO: 実装
+}
+
 func createUser(u usecase.User) (*domain.User, error) {
 	return u.Create(context.Background(), "username")
 }
@@ -43,7 +47,8 @@ func main() {
 		return
 	}
 
-	log.Info().Interface("user", user).Send()
+	// 本当`Interfacee()`にしたいが、Privateなフィールドは出力できないので`Str()`
+	log.Info().Interface("action", "createUser").Interface("userID", user.ID().String()).Send()
 
 	task, err := createTask(taskUsecase, user.ID().String())
 	if err != nil {
@@ -51,5 +56,5 @@ func main() {
 		return
 	}
 
-	log.Info().Interface("task", task).Send()
+	log.Info().Interface("action", "createTask").Interface("taskID", task.ID().String()).Send()
 }
