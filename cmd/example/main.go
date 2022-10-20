@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
+
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
+	"github.com/s-beats/rest-todo/domain"
 	"github.com/s-beats/rest-todo/domain/repository"
 	"github.com/s-beats/rest-todo/infra/rdb"
 	"github.com/s-beats/rest-todo/usecase"
@@ -15,12 +18,12 @@ func init() {
 	}
 }
 
-func createUser(u usecase.User) error {
-	panic("not implemented")
+func createUser(u usecase.User) (*domain.User, error) {
+	return u.Create(context.Background(), "username")
 }
 
-func createTask(u usecase.Task) error {
-	panic("not implemented")
+func createTask(u usecase.Task, userID string) (*domain.Task, error) {
+	return u.Create(context.Background(), "title", "description", userID, "HIGH")
 }
 
 func main() {
@@ -31,10 +34,22 @@ func main() {
 
 	taskRepo := repository.NewTask(db)
 	userRepo := repository.NewUser(db)
-	_ = usecase.NewTask(taskRepo, userRepo)
+	taskUsecase := usecase.NewTask(taskRepo, userRepo)
 	userUsecase := usecase.NewUser(userRepo)
 
-	if err := createUser(userUsecase); err != nil {
+	user, err := createUser(userUsecase)
+	if err != nil {
 		log.Error().Err(err).Send()
+		return
 	}
+
+	log.Info().Interface("user", user).Send()
+
+	task, err := createTask(taskUsecase, user.ID().String())
+	if err != nil {
+		log.Error().Err(err).Send()
+		return
+	}
+
+	log.Info().Interface("task", task).Send()
 }
