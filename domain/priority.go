@@ -1,26 +1,33 @@
 package domain
 
-type Priority string
+import "github.com/samber/lo"
+
+type Priority int
 
 const (
-	high   Priority = "HIGH"
-	middle Priority = "MIDDLE"
-	low    Priority = "LOW"
+	high Priority = iota + 1
+	middle
+	low
 )
 
+var priorityMap = map[Priority]string{
+	high:   "HIGH",
+	middle: "MIDDLE",
+	low:    "LOW",
+}
+
 func (p Priority) Value() string {
-	return string(p)
+	v, ok := priorityMap[p]
+	if !ok {
+		panic("invalid priority value")
+	}
+	return v
 }
 
 func NewPriority(val string) Priority {
-	switch val {
-	case string(high):
-		return high
-	case string(middle):
-		return middle
-	case string(low):
-		return low
-	default:
+	v, ok := lo.FindKey(priorityMap, val)
+	if !ok {
 		panic("invalid priority value")
 	}
+	return v
 }

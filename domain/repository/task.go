@@ -55,7 +55,7 @@ func (t *task) Save(ctx context.Context, task *domain.Task) error {
 	}
 
 	var taskPriorityID int
-	has, err := t.db.Table("task_priorities").Cols("id").Where("value = ?", task.Priority().Value()).Get(&taskPriorityID)
+	has, err := t.db.Table("task_priorities").Cols("id").Where("value = ?", task.Priority()).Get(&taskPriorityID)
 	if err != nil {
 		return xerrors.Errorf("%v", err)
 	}
