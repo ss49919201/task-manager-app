@@ -24,17 +24,3 @@ CREATE TABLE
         FOREIGN KEY (`user_id`) REFERENCES users(`id`),
         FOREIGN KEY (`priority_id`) REFERENCES task_priorities(`id`)
     ) DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS task_has_priorities;
-
-CREATE TABLE
-    IF NOT EXISTS task_has_priorities (
-        `id` INT AUTO_INCREMENT NOT NULL,
-        `task_id` CHAR(36) COLLATE utf8mb4_unicode_ci NOT NULL,
-        `priority_id` INT UNSIGNED NOT NULL,
-        `created_at` DATETIME NOT NULL,
-        `updated_at` DATETIME NOT NULL,
-        PRIMARY KEY (`id`),
-        FOREIGN KEY (`task_id`) REFERENCES tasks(`id`),
-        FOREIGN KEY (`priority_id`) REFERENCES task_priorities(`id`)
-    ) DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

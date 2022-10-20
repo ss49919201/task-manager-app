@@ -6,6 +6,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"xorm.io/xorm"
+	"xorm.io/xorm/log"
 )
 
 func NewDB() (*xorm.Engine, error) {
@@ -13,7 +14,12 @@ func NewDB() (*xorm.Engine, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	// TODO: Configure connection pool
+	logger := log.NewSimpleLogger(os.Stdout)
+	logger.ShowSQL(true)
+	engine.SetLogger(logger)
+
 	return engine, nil
 }
 
