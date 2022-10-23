@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/s-beats/rest-todo/domain"
+	"github.com/samber/mo"
 	"golang.org/x/xerrors"
 	"xorm.io/xorm"
 )
@@ -30,17 +31,17 @@ func (t *UserDTO) TableName() string {
 	return "users"
 }
 
-func (u *user) Save(ctx context.Context, user *domain.User) error {
+func (u *user) Save(ctx context.Context, user *domain.User) mo.Result[*domain.User] {
 	session := u.db.NewSession().Context(ctx)
 	return u.save(session, user)
 }
 
-func (u *user) SaveWithTx(ctx context.Context, user *domain.User) error {
+func (u *user) SaveWithTx(ctx context.Context, user *domain.User) mo.Result[*domain.User] {
 	// TODO: トランザクションの実装
-	return nil
+	panic("not implemented")
 }
 
-func (u *user) save(session *xorm.Session, user *domain.User) error {
+func (u *user) save(session *xorm.Session, user *domain.User) mo.Result[*domain.User] {
 	userDTO := &UserDTO{
 		ID:        user.ID().String(),
 		Name:      user.Name(),
@@ -49,37 +50,37 @@ func (u *user) save(session *xorm.Session, user *domain.User) error {
 
 	exists, err := session.Table(userDTO.TableName()).Where("id = ?", userDTO.ID).Exist()
 	if err != nil {
-		return xerrors.Errorf("%v", err)
+		return domain.ToErrUser(xerrors.Errorf("%v", err))
 	}
 
 	if exists {
 		_, err := session.ID(userDTO.ID).Update(userDTO)
 		if err != nil {
-			return xerrors.Errorf("%v", err)
+			return domain.ToErrUser(xerrors.Errorf("%v", err))
 		}
 	} else {
 		userDTO.CreatedAt = userDTO.UpdatedAt
 		_, err := session.Insert(userDTO)
 		if err != nil {
-			return xerrors.Errorf("%v", err)
+			return domain.ToErrUser(xerrors.Errorf("%v", err))
 		}
 	}
 
-	return nil
+	return domain.ToOKUser(user)
 }
 
-func (u *user) GetOne(ctx context.Context, userID domain.UserID) (*domain.User, error) {
+func (u *user) GetOne(ctx context.Context, userID domain.UserID) mo.Result[*domain.User] {
 	session := u.db.NewSession().Context(ctx)
 	userDTO := UserDTO{ID: userID.String()}
 	has, err := session.Get(&userDTO)
 	if err != nil {
-		return nil, err
+		return domain.ToErrUser(err)
 	}
 	if !has {
-		return nil, xerrors.New("user not found")
+		return domain.ToErrUser(xerrors.New("user not found"))
 	}
 	return domain.NewUser(
 		domain.NewUserID(userDTO.ID),
 		userDTO.Name,
-	), nil
+	)
 }

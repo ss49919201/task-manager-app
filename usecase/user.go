@@ -6,6 +6,7 @@ import (
 	"github.com/s-beats/rest-todo/domain"
 	"github.com/s-beats/rest-todo/domain/repository"
 	"github.com/s-beats/rest-todo/util"
+	"github.com/samber/mo"
 )
 
 type User interface {
@@ -23,15 +24,15 @@ func NewUser(userRepo repository.User) User {
 }
 
 func (u *user) Create(ctx context.Context, name string) (*domain.User, error) {
-	user := domain.NewUser(
+	result := domain.NewUser(
 		domain.NewUserID(util.NewUUID()),
 		name,
-	)
-
-	err := u.userRepository.Save(ctx, user)
-	if err != nil {
-		return nil, err
+	).FlatMap(func(val *domain.User) mo.Result[*domain.User] {
+		return u.userRepository.Save(ctx, val)
+	})
+	if result.Error() != nil {
+		return nil, result.Error()
 	}
 
-	return user, nil
+	return result.MustGet(), nil
 }

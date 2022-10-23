@@ -6,6 +6,7 @@ import (
 	"github.com/s-beats/rest-todo/domain"
 	"github.com/s-beats/rest-todo/domain/repository"
 	"github.com/s-beats/rest-todo/util"
+	"github.com/samber/mo"
 )
 
 type Task interface {
@@ -25,13 +26,14 @@ func NewTask(taskRepo repository.Task, userRepo repository.User) Task {
 }
 
 func (t *task) Create(ctx context.Context, title, text, userID, priority string) (*domain.Task, error) {
-	user, err := t.userRepository.GetOne(ctx, *domain.NewUserID(userID))
-	if err != nil {
-		return nil, err
+	result1 := t.userRepository.GetOne(ctx, *domain.NewUserID(userID))
+	if result1.Error() != nil {
+		return nil, result1.Error()
 	}
+	user := result1.MustGet()
 
 	now := util.GetTimeNow()
-	task := domain.NewTask(
+	result2 := domain.NewTask(
 		domain.NewTaskID(util.NewUUID()),
 		domain.NewTaskTitle(title),
 		domain.NewTaskText(text),
@@ -39,11 +41,12 @@ func (t *task) Create(ctx context.Context, title, text, userID, priority string)
 		now,
 		user,
 		domain.NewPriority(priority),
-	)
-
-	if err := t.taskRepository.Save(ctx, task); err != nil {
-		return nil, err
+	).FlatMap(func(val *domain.Task) mo.Result[*domain.Task] {
+		return t.taskRepository.Save(ctx, val)
+	})
+	if result2.Error() != nil {
+		return nil, result2.Error()
 	}
 
-	return task, nil
+	return result2.MustGet(), nil
 }

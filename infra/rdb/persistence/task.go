@@ -7,6 +7,7 @@ import (
 	"github.com/s-beats/rest-todo/domain"
 	"github.com/s-beats/rest-todo/domain/repository"
 	"github.com/s-beats/rest-todo/infra/rdb/persistence/internal"
+	"github.com/samber/mo"
 	"golang.org/x/xerrors"
 	"xorm.io/xorm"
 )
@@ -35,7 +36,7 @@ func (t *TaskDTO) TableName() string {
 	return "tasks"
 }
 
-func (t *task) Save(ctx context.Context, task *domain.Task) error {
+func (t *task) Save(ctx context.Context, task *domain.Task) mo.Result[*domain.Task] {
 	taskDTO := &TaskDTO{
 		ID:        task.ID().String(),
 		Title:     task.Title().String(),
@@ -48,10 +49,10 @@ func (t *task) Save(ctx context.Context, task *domain.Task) error {
 	var taskPriorityID uint
 	has, err := t.db.Table("task_priorities").Cols("id").Where("value = ?", task.Priority()).Get(&taskPriorityID)
 	if err != nil {
-		return xerrors.Errorf("%v", err)
+		return domain.ToErrTask(xerrors.Errorf("%v", err))
 	}
 	if !has {
-		return xerrors.New("invalid task priority")
+		return domain.ToErrTask(xerrors.New("invalid task priority"))
 	}
 
 	taskDTO.PriorityID = taskPriorityID
@@ -62,12 +63,12 @@ func (t *task) Save(ctx context.Context, task *domain.Task) error {
 			Cols("title", "text", "updated_at", "priority_id").
 			Where("id = ?", taskDTO.ID)
 	}); err != nil {
-		return err
+		return domain.ToErrTask(err)
 	}
 
-	return nil
+	return domain.ToOKTask(task)
 }
 
-func (t *task) GetOne(ctx context.Context, taskID domain.TaskID) (*domain.Task, error) {
+func (t *task) GetOne(ctx context.Context, taskID domain.TaskID) mo.Result[*domain.Task] {
 	panic("not implement")
 }

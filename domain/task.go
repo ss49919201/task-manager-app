@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/s-beats/rest-todo/util"
+	"github.com/samber/mo"
 )
 
 type Task struct {
@@ -16,16 +17,18 @@ type Task struct {
 	priority  Priority
 }
 
-func NewTask(id *TaskID, title *TaskTitle, text *TaskText, createdAt, updatedAt time.Time, createdBy *User, priority Priority) *Task {
-	return &Task{
-		id:        id,
-		title:     title,
-		text:      text,
-		createdAt: createdAt,
-		updatedAt: updatedAt,
-		createdBy: createdBy,
-		priority:  priority,
-	}
+func NewTask(id *TaskID, title *TaskTitle, text *TaskText, createdAt, updatedAt time.Time, createdBy *User, priority Priority) mo.Result[*Task] {
+	return ToOKTask(
+		&Task{
+			id:        id,
+			title:     title,
+			text:      text,
+			createdAt: createdAt,
+			updatedAt: updatedAt,
+			createdBy: createdBy,
+			priority:  priority,
+		},
+	)
 }
 
 func (t *Task) ID() *TaskID {
@@ -96,4 +99,12 @@ func NewTaskText(text string) *TaskText {
 	return &TaskText{
 		text: text,
 	}
+}
+
+func ToOKTask(v *Task) mo.Result[*Task] {
+	return mo.Ok(v)
+}
+
+func ToErrTask(err error) mo.Result[*Task] {
+	return mo.Err[*Task](err)
 }
