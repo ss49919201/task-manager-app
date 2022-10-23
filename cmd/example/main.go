@@ -6,8 +6,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 	"github.com/s-beats/rest-todo/domain"
-	"github.com/s-beats/rest-todo/domain/repository"
 	"github.com/s-beats/rest-todo/infra/rdb"
+	"github.com/s-beats/rest-todo/infra/rdb/persistence"
 	"github.com/s-beats/rest-todo/usecase"
 )
 
@@ -36,8 +36,8 @@ func main() {
 		log.Fatal().Err(err)
 	}
 
-	taskRepo := repository.NewTask(db)
-	userRepo := repository.NewUser(db)
+	taskRepo := persistence.NewTask(db)
+	userRepo := persistence.NewUser(db)
 	taskUsecase := usecase.NewTask(taskRepo, userRepo)
 	userUsecase := usecase.NewUser(userRepo)
 
