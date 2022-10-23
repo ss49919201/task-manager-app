@@ -37,8 +37,13 @@ func usecaseMiddlewarefunc(f http.HandlerFunc) http.HandlerFunc {
 		taskUsecase := usecase.NewTask(taskRepo, userRepo)
 		userUsecase := usecase.NewUser(userRepo)
 
-		r = r.WithContext(context.WithValue(r.Context(), contextKeyTaskUsecase, taskUsecase))
-		r = r.WithContext(context.WithValue(r.Context(), contextKeyUserUsecase, userUsecase))
+		m := map[contextKey]any{
+			contextKeyTaskUsecase: taskUsecase,
+			contextKeyUserUsecase: userUsecase,
+		}
+		for k, v := range m {
+			r = r.WithContext(context.WithValue(r.Context(), k, v))
+		}
 
 		f(w, r)
 	}
