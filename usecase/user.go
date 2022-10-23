@@ -6,7 +6,6 @@ import (
 	"github.com/s-beats/rest-todo/domain"
 	"github.com/s-beats/rest-todo/domain/repository"
 	"github.com/s-beats/rest-todo/util"
-	"github.com/samber/mo"
 )
 
 type User interface {
@@ -24,12 +23,9 @@ func NewUser(userRepo repository.User) User {
 }
 
 func (u *user) Create(ctx context.Context, name string) (*domain.User, error) {
-	result := domain.NewUser(
-		domain.NewUserID(util.NewUUID()),
-		name,
-	).FlatMap(func(val *domain.User) mo.Result[*domain.User] {
-		return u.userRepository.Save(ctx, val)
-	})
+	wrappedSave := util.ConvMapperWithCtx(ctx, u.userRepository.Save)
+
+	result := domain.NewUser(domain.NewUserID(util.NewUUID()), name).FlatMap(wrappedSave)
 	if result.Error() != nil {
 		return nil, result.Error()
 	}

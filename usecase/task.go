@@ -6,7 +6,7 @@ import (
 	"github.com/s-beats/rest-todo/domain"
 	"github.com/s-beats/rest-todo/domain/repository"
 	"github.com/s-beats/rest-todo/domain/service"
-	"github.com/samber/mo"
+	"github.com/s-beats/rest-todo/util"
 )
 
 type Task interface {
@@ -26,16 +26,12 @@ func NewTask(taskService service.Task, taskRepository repository.Task) Task {
 }
 
 func (t *task) Create(ctx context.Context, title, text, userID, priority string) (*domain.Task, error) {
-	result := t.taskService.CreateTaskByUser(ctx, title, text, userID, priority).FlatMap(a(ctx, t.taskRepository.Save))
+	wappedSave := util.ConvMapperWithCtx(ctx, t.taskRepository.Save)
+
+	result := t.taskService.CreateTaskByUser(ctx, title, text, userID, priority).FlatMap(wappedSave)
 	if result.Error() != nil {
 		return nil, result.Error()
 	}
 
 	return result.MustGet(), nil
-}
-
-func a[T any](ctx context.Context, fn func(ctx context.Context, val T) mo.Result[T]) func(v T) mo.Result[T] {
-	return func(v T) mo.Result[T] {
-		return fn(ctx, v)
-	}
 }
