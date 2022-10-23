@@ -19,8 +19,32 @@ func init() {
 	}
 }
 
-func exec[T any](fn func() (T, error)) {
-	// TODO: 実装
+func run() error {
+	db, err := rdb.NewDB()
+	if err != nil {
+		return err
+	}
+
+	diContainer := di.NewContainer(db)
+
+	taskUsecase := do.MustInvoke[usecase.Task](diContainer.Injector)
+	userUsecase := do.MustInvoke[usecase.User](diContainer.Injector)
+
+	user, err := createUser(userUsecase)
+	if err != nil {
+		return err
+	}
+
+	// 本当`Interfacee()`にしたいが、Privateなフィールドは出力できないので`Str()`
+	log.Info().Interface("action", "createUser").Interface("userID", user.ID().String()).Send()
+
+	task, err := createTask(taskUsecase, user.ID().String())
+	if err != nil {
+		return err
+	}
+
+	log.Info().Interface("action", "createTask").Interface("taskID", task.ID().String()).Send()
+	return nil
 }
 
 func createUser(u usecase.User) (*domain.User, error) {
@@ -32,30 +56,7 @@ func createTask(u usecase.Task, userID string) (*domain.Task, error) {
 }
 
 func main() {
-	db, err := rdb.NewDB()
-	if err != nil {
+	if err := run(); err != nil {
 		log.Fatal().Err(err)
 	}
-
-	diContainer := di.NewContainer(db)
-
-	taskUsecase := do.MustInvoke[usecase.Task](diContainer.Injector)
-	userUsecase := do.MustInvoke[usecase.User](diContainer.Injector)
-
-	user, err := createUser(userUsecase)
-	if err != nil {
-		log.Error().Err(err).Send()
-		return
-	}
-
-	// 本当`Interfacee()`にしたいが、Privateなフィールドは出力できないので`Str()`
-	log.Info().Interface("action", "createUser").Interface("userID", user.ID().String()).Send()
-
-	task, err := createTask(taskUsecase, user.ID().String())
-	if err != nil {
-		log.Error().Err(err).Send()
-		return
-	}
-
-	log.Info().Interface("action", "createTask").Interface("taskID", task.ID().String()).Send()
 }
