@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/joho/godotenv"
-	"github.com/rs/zerolog/log"
 	"github.com/s-beats/rest-todo/domain"
 	"github.com/s-beats/rest-todo/infra/rdb"
 	"github.com/s-beats/rest-todo/infra/rdb/persistence"
+	"github.com/s-beats/rest-todo/log"
 	"github.com/s-beats/rest-todo/usecase"
 )
 

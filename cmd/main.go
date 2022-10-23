@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/joho/godotenv"
-	"github.com/rs/zerolog/log"
+	"github.com/s-beats/rest-todo/log"
 	"github.com/s-beats/rest-todo/server"
 
 	_ "github.com/go-sql-driver/mysql"
