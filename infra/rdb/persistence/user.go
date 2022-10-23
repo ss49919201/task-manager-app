@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/s-beats/rest-todo/domain"
+	"github.com/s-beats/rest-todo/domain/repository"
 	"github.com/samber/mo"
 	"golang.org/x/xerrors"
 	"xorm.io/xorm"
@@ -14,7 +15,7 @@ type user struct {
 	db *xorm.Engine
 }
 
-func NewUser(db *xorm.Engine) *user {
+func NewUser(db *xorm.Engine) repository.User {
 	return &user{
 		db: db,
 	}

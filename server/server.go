@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/s-beats/rest-todo/di"
 	"github.com/s-beats/rest-todo/log"
+	"github.com/samber/do"
 
 	"github.com/s-beats/rest-todo/infra/rdb"
-	"github.com/s-beats/rest-todo/infra/rdb/persistence"
 	"github.com/s-beats/rest-todo/usecase"
 )
 
@@ -32,10 +33,10 @@ func usecaseMiddlewarefunc(f http.HandlerFunc) http.HandlerFunc {
 			log.Fatal().Err(err)
 		}
 
-		taskRepo := persistence.NewTask(db)
-		userRepo := persistence.NewUser(db)
-		taskUsecase := usecase.NewTask(taskRepo, userRepo)
-		userUsecase := usecase.NewUser(userRepo)
+		diContainer := di.NewContainer(db)
+
+		taskUsecase := do.MustInvoke[usecase.Task](diContainer.Injector)
+		userUsecase := do.MustInvoke[usecase.User](diContainer.Injector)
 
 		m := map[contextKey]any{
 			contextKeyTaskUsecase: taskUsecase,

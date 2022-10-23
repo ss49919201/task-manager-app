@@ -5,7 +5,7 @@ import (
 
 	"github.com/s-beats/rest-todo/domain"
 	"github.com/s-beats/rest-todo/domain/repository"
-	"github.com/s-beats/rest-todo/util"
+	"github.com/s-beats/rest-todo/domain/service"
 	"github.com/samber/mo"
 )
 
@@ -14,39 +14,28 @@ type Task interface {
 }
 
 type task struct {
+	taskService    service.Task
 	taskRepository repository.Task
-	userRepository repository.User
 }
 
-func NewTask(taskRepo repository.Task, userRepo repository.User) Task {
+func NewTask(taskService service.Task, taskRepository repository.Task) Task {
 	return &task{
-		taskRepository: taskRepo,
-		userRepository: userRepo,
+		taskService:    taskService,
+		taskRepository: taskRepository,
 	}
 }
 
 func (t *task) Create(ctx context.Context, title, text, userID, priority string) (*domain.Task, error) {
-	result1 := t.userRepository.GetOne(ctx, *domain.NewUserID(userID))
-	if result1.Error() != nil {
-		return nil, result1.Error()
-	}
-	user := result1.MustGet()
-
-	now := util.GetTimeNow()
-	result2 := domain.NewTask(
-		domain.NewTaskID(util.NewUUID()),
-		domain.NewTaskTitle(title),
-		domain.NewTaskText(text),
-		now,
-		now,
-		user,
-		domain.NewPriority(priority),
-	).FlatMap(func(val *domain.Task) mo.Result[*domain.Task] {
-		return t.taskRepository.Save(ctx, val)
-	})
-	if result2.Error() != nil {
-		return nil, result2.Error()
+	result := t.taskService.CreateTaskByUser(ctx, title, text, userID, priority).FlatMap(a(ctx, t.taskRepository.Save))
+	if result.Error() != nil {
+		return nil, result.Error()
 	}
 
-	return result2.MustGet(), nil
+	return result.MustGet(), nil
+}
+
+func a[T any](ctx context.Context, fn func(ctx context.Context, val T) mo.Result[T]) func(v T) mo.Result[T] {
+	return func(v T) mo.Result[T] {
+		return fn(ctx, v)
+	}
 }
