@@ -3,7 +3,6 @@ package domain
 import (
 	"time"
 
-	"github.com/s-beats/rest-todo/util"
 	"github.com/samber/mo"
 )
 
@@ -57,48 +56,6 @@ func (t *Task) CreatedBy() *User {
 
 func (t *Task) Priority() Priority {
 	return t.priority
-}
-
-type TaskID struct {
-	id string
-}
-
-func (t *TaskID) String() string {
-	return t.id
-}
-
-func NewTaskID(id string) *TaskID {
-	return &TaskID{
-		id: util.UUIDMustParse(id),
-	}
-}
-
-type TaskTitle struct {
-	title string
-}
-
-func (t *TaskTitle) String() string {
-	return t.title
-}
-
-func NewTaskTitle(title string) *TaskTitle {
-	return &TaskTitle{
-		title: title,
-	}
-}
-
-type TaskText struct {
-	text string
-}
-
-func (t *TaskText) String() string {
-	return t.text
-}
-
-func NewTaskText(text string) *TaskText {
-	return &TaskText{
-		text: text,
-	}
 }
 
 func ToOKTask(v *Task) mo.Result[*Task] {
