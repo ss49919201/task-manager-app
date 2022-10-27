@@ -8,7 +8,7 @@ type TaskID struct {
 	id string
 }
 
-func (t *TaskID) String() string {
+func (t TaskID) String() string {
 	return t.id
 }
 
@@ -22,7 +22,7 @@ type TaskTitle struct {
 	title string
 }
 
-func (t *TaskTitle) String() string {
+func (t TaskTitle) String() string {
 	return t.title
 }
 
@@ -36,7 +36,7 @@ type TaskText struct {
 	text string
 }
 
-func (t *TaskText) String() string {
+func (t TaskText) String() string {
 	return t.text
 }
 
