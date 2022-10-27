@@ -1,22 +1,27 @@
 package domain
 
 import (
+	"errors"
 	"time"
 
 	"github.com/samber/mo"
 )
 
 type Task struct {
-	id        *TaskID
-	title     *TaskTitle
-	text      *TaskText
+	id        TaskID
+	title     TaskTitle
+	text      TaskText
 	createdAt time.Time
 	updatedAt time.Time
 	createdBy *User
 	priority  Priority
 }
 
-func NewTask(id *TaskID, title *TaskTitle, text *TaskText, createdAt, updatedAt time.Time, createdBy *User, priority Priority) mo.Result[*Task] {
+func NewTask(id TaskID, title TaskTitle, text TaskText, createdAt, updatedAt time.Time, createdBy *User, priority Priority) mo.Result[*Task] {
+	if createdAt.After(updatedAt) {
+		return ToErrTask(errors.New("createdAt must be LTE updatedAt"))
+	}
+
 	return ToOKTask(
 		&Task{
 			id:        id,
