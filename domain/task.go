@@ -7,6 +7,11 @@ import (
 	"github.com/samber/mo"
 )
 
+var (
+	// TODO: 抽象化
+	ErrNewTaskInvalidDate = errors.New("createdAt must be LTE updatedAt")
+)
+
 type Task struct {
 	id        TaskID
 	title     TaskTitle
@@ -19,7 +24,7 @@ type Task struct {
 
 func NewTask(id TaskID, title TaskTitle, text TaskText, createdAt, updatedAt time.Time, createdBy *User, priority Priority) mo.Result[*Task] {
 	if createdAt.After(updatedAt) {
-		return ToErrTask(errors.New("createdAt must be LTE updatedAt"))
+		return ToErrTask(ErrNewTaskInvalidDate)
 	}
 
 	return ToOKTask(
