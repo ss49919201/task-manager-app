@@ -35,15 +35,15 @@ func NewTask(id TaskID, title TaskTitle, text TaskText, createdAt, updatedAt tim
 	)
 }
 
-func (t *Task) ID() *TaskID {
+func (t *Task) ID() TaskID {
 	return t.id
 }
 
-func (t *Task) Title() *TaskTitle {
+func (t *Task) Title() TaskTitle {
 	return t.title
 }
 
-func (t *Task) Text() *TaskText {
+func (t *Task) Text() TaskText {
 	return t.text
 }
 

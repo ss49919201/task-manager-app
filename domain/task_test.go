@@ -8,9 +8,9 @@ import (
 
 func TestNewTask(t *testing.T) {
 	type args struct {
-		id        *TaskID
-		title     *TaskTitle
-		text      *TaskText
+		id        TaskID
+		title     TaskTitle
+		text      TaskText
 		createdAt time.Time
 		updatedAt time.Time
 		createdBy *User
@@ -34,9 +34,9 @@ func TestNewTask(t *testing.T) {
 
 func TestTask_ID(t *testing.T) {
 	type fields struct {
-		id        *TaskID
-		title     *TaskTitle
-		text      *TaskText
+		id        TaskID
+		title     TaskTitle
+		text      TaskText
 		createdAt time.Time
 		updatedAt time.Time
 		createdBy *User
@@ -45,7 +45,7 @@ func TestTask_ID(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields fields
-		want   *TaskID
+		want   TaskID
 	}{
 		// TODO: Add test cases.
 	}
@@ -69,9 +69,9 @@ func TestTask_ID(t *testing.T) {
 
 func TestTask_Title(t *testing.T) {
 	type fields struct {
-		id        *TaskID
-		title     *TaskTitle
-		text      *TaskText
+		id        TaskID
+		title     TaskTitle
+		text      TaskText
 		createdAt time.Time
 		updatedAt time.Time
 		createdBy *User
@@ -104,9 +104,9 @@ func TestTask_Title(t *testing.T) {
 
 func TestTask_Text(t *testing.T) {
 	type fields struct {
-		id        *TaskID
-		title     *TaskTitle
-		text      *TaskText
+		id        TaskID
+		title     TaskTitle
+		text      TaskText
 		createdAt time.Time
 		updatedAt time.Time
 		createdBy *User
@@ -139,9 +139,9 @@ func TestTask_Text(t *testing.T) {
 
 func TestTask_CreatedAt(t *testing.T) {
 	type fields struct {
-		id        *TaskID
-		title     *TaskTitle
-		text      *TaskText
+		id        TaskID
+		title     TaskTitle
+		text      TaskText
 		createdAt time.Time
 		updatedAt time.Time
 		createdBy *User
@@ -174,9 +174,9 @@ func TestTask_CreatedAt(t *testing.T) {
 
 func TestTask_UpdatedAt(t *testing.T) {
 	type fields struct {
-		id        *TaskID
-		title     *TaskTitle
-		text      *TaskText
+		id        TaskID
+		title     TaskTitle
+		text      TaskText
 		createdAt time.Time
 		updatedAt time.Time
 		createdBy *User
@@ -209,9 +209,9 @@ func TestTask_UpdatedAt(t *testing.T) {
 
 func TestTask_CreatedBy(t *testing.T) {
 	type fields struct {
-		id        *TaskID
-		title     *TaskTitle
-		text      *TaskText
+		id        TaskID
+		title     TaskTitle
+		text      TaskText
 		createdAt time.Time
 		updatedAt time.Time
 		createdBy *User
@@ -244,9 +244,9 @@ func TestTask_CreatedBy(t *testing.T) {
 
 func TestTask_Priority(t *testing.T) {
 	type fields struct {
-		id        *TaskID
-		title     *TaskTitle
-		text      *TaskText
+		id        TaskID
+		title     TaskTitle
+		text      TaskText
 		createdAt time.Time
 		updatedAt time.Time
 		createdBy *User
@@ -307,7 +307,7 @@ func TestNewTaskID(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *TaskID
+		want TaskID
 	}{
 		// TODO: Add test cases.
 	}

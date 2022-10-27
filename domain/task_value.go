@@ -12,8 +12,8 @@ func (t *TaskID) String() string {
 	return t.id
 }
 
-func NewTaskID(id string) *TaskID {
-	return &TaskID{
+func NewTaskID(id string) TaskID {
+	return TaskID{
 		id: util.UUIDMustParse(id),
 	}
 }
@@ -26,8 +26,8 @@ func (t *TaskTitle) String() string {
 	return t.title
 }
 
-func NewTaskTitle(title string) *TaskTitle {
-	return &TaskTitle{
+func NewTaskTitle(title string) TaskTitle {
+	return TaskTitle{
 		title: title,
 	}
 }
@@ -40,8 +40,8 @@ func (t *TaskText) String() string {
 	return t.text
 }
 
-func NewTaskText(text string) *TaskText {
-	return &TaskText{
+func NewTaskText(text string) TaskText {
+	return TaskText{
 		text: text,
 	}
 }
