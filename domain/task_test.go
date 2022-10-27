@@ -4,6 +4,9 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/samber/mo"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewTask(t *testing.T) {
@@ -19,15 +22,57 @@ func TestNewTask(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *Task
+		want mo.Result[*Task]
 	}{
-		// TODO: Add test cases.
+		{
+			name: "正常系",
+			args: args{
+				id:        TaskID{"1"},
+				title:     TaskTitle{"title"},
+				text:      TaskText{"text"},
+				createdAt: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+				updatedAt: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+				createdBy: &User{
+					id:   UserID{"1"},
+					name: "name",
+				},
+				priority: Priority(1),
+			},
+			want: mo.Ok(
+				&Task{
+					id:        TaskID{"1"},
+					title:     TaskTitle{"title"},
+					text:      TaskText{"text"},
+					createdAt: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+					updatedAt: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+					createdBy: &User{
+						id:   UserID{"1"},
+						name: "name",
+					},
+					priority: Priority(1),
+				}),
+		},
+		{
+			name: "作成日時が更新日時より後の場合はエラー",
+			args: args{
+				id:        TaskID{"1"},
+				title:     TaskTitle{"title"},
+				text:      TaskText{"text"},
+				createdAt: time.Date(2020, 1, 1, 0, 0, 0, 1, time.UTC),
+				updatedAt: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+				createdBy: &User{
+					id:   UserID{"1"},
+					name: "name",
+				},
+				priority: Priority(1),
+			},
+			want: mo.Err[*Task](ErrNewTaskInvalidDate),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewTask(tt.args.id, tt.args.title, tt.args.text, tt.args.createdAt, tt.args.updatedAt, tt.args.createdBy, tt.args.priority); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewTask() = %v, want %v", got, tt.want)
-			}
+			got := NewTask(tt.args.id, tt.args.title, tt.args.text, tt.args.createdAt, tt.args.updatedAt, tt.args.createdBy, tt.args.priority)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

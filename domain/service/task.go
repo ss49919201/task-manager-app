@@ -26,7 +26,7 @@ func NewTask(userRepo repository.User, taskRepo repository.Task) Task {
 }
 
 func (t *task) CreateTaskByUser(ctx context.Context, title, text, userID, priority string) mo.Result[*domain.Task] {
-	result := t.userRepository.GetOne(ctx, *domain.NewUserID(userID))
+	result := t.userRepository.GetOne(ctx, domain.NewUserID(userID))
 	if result.Error() != nil {
 		return domain.ToErrTask(result.Error())
 	}

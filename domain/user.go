@@ -6,11 +6,11 @@ import (
 )
 
 type User struct {
-	id   *UserID
+	id   UserID
 	name string
 }
 
-func NewUser(id *UserID, name string) mo.Result[*User] {
+func NewUser(id UserID, name string) mo.Result[*User] {
 	return ToOKUser(
 		&User{
 			id:   id,
@@ -19,7 +19,7 @@ func NewUser(id *UserID, name string) mo.Result[*User] {
 	)
 }
 
-func (u *User) ID() *UserID {
+func (u User) ID() UserID {
 	return u.id
 }
 
@@ -27,12 +27,12 @@ type UserID struct {
 	id string
 }
 
-func (u *UserID) String() string {
+func (u UserID) String() string {
 	return u.id
 }
 
-func NewUserID(id string) *UserID {
-	return &UserID{
+func NewUserID(id string) UserID {
+	return UserID{
 		id: util.UUIDMustParse(id),
 	}
 }
