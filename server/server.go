@@ -30,7 +30,12 @@ func NewRouter() *router {
 	return &router{}
 }
 
+// TODO: 重複の対応
 func (r *router) SetMiddleware(m middleware) *router {
+	if m == nil {
+		return r
+	}
+
 	r.middlewareFunctions = append(r.middlewareFunctions, m)
 	return r
 }
