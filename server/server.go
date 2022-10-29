@@ -20,6 +20,21 @@ func Start() error {
 	return http.ListenAndServe(net.JoinHostPort(host, port), nil)
 }
 
+type middleware func(http.HandlerFunc) http.HandlerFunc
+
+type router struct {
+	middlewareFunctions []middleware
+}
+
+func NewRouter() *router {
+	return &router{}
+}
+
+func (r *router) SetMiddleware(m middleware) *router {
+	r.middlewareFunctions = append(r.middlewareFunctions, m)
+	return r
+}
+
 func usecaseMiddlewarefunc(f http.HandlerFunc) http.HandlerFunc {
 	type contextKey string
 	const (
