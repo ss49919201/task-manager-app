@@ -438,19 +438,18 @@ func TestNewTaskText(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *TaskText
+		want TaskText
 	}{
 		{
 			"success",
 			args{"test"},
-			&TaskText{"test"},
+			TaskText{"test"},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewTaskText(tt.args.text); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewTaskText() = %v, want %v", got, tt.want)
-			}
+			got := NewTaskText(tt.args.text)
+			assert.Equal(t, got, tt.want)
 		})
 	}
 }
