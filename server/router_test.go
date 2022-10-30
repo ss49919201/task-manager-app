@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"container/list"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -115,13 +116,13 @@ func Test_router_middlware(t *testing.T) {
 	r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("/" + strconv.Itoa(2)))
 	})
-	r.SetMiddleware(func(next http.HandlerFunc) http.HandlerFunc {
+	r.PushBackMiddleware(func(next http.HandlerFunc) http.HandlerFunc {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(strconv.Itoa(1)))
 			next.ServeHTTP(w, r)
 		})
 	})
-	r.SetMiddleware(func(next http.HandlerFunc) http.HandlerFunc {
+	r.PushBackMiddleware(func(next http.HandlerFunc) http.HandlerFunc {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			next.ServeHTTP(w, r)
 			w.Write([]byte("/" + strconv.Itoa(3)))
@@ -147,11 +148,13 @@ func Test_router_middlware(t *testing.T) {
 	assert.True(t, three > two && two > one)
 }
 
-func Test_router_SetMiddleware(t *testing.T) {
+func Test_router_PushBackMiddleware(t *testing.T) {
 	testFn := middleware(func(f http.HandlerFunc) http.HandlerFunc { return f })
+	hasTestFnRouter := NewRouter()
+	hasTestFnRouter.middlewareFunctions.PushBack(testFn)
 
 	type fields struct {
-		middlewareFunctions []middleware
+		middlewareFunctions *list.List
 	}
 	type args struct {
 		m middleware
@@ -166,13 +169,15 @@ func Test_router_SetMiddleware(t *testing.T) {
 			"add one",
 			fields{},
 			args{testFn},
-			&router{middlewareFunctions: []middleware{testFn}},
+			hasTestFnRouter,
 		},
 		{
 			"add nil",
 			fields{},
 			args{nil},
-			&router{},
+			&router{
+				middlewareFunctions: list.New(),
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -180,8 +185,8 @@ func Test_router_SetMiddleware(t *testing.T) {
 			r := &router{
 				middlewareFunctions: tt.fields.middlewareFunctions,
 			}
-			got := r.SetMiddleware(tt.args.m)
-			assert.Equal(t, len(tt.want.middlewareFunctions), len(got.middlewareFunctions))
+			got := r.PushBackMiddleware(tt.args.m)
+			assert.Equal(t, tt.want.middlewareFunctions.Len(), got.middlewareFunctions.Len())
 		})
 	}
 }

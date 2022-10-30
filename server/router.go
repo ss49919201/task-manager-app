@@ -1,6 +1,7 @@
 package server
 
 import (
+	"container/list"
 	"net/http"
 	"sync"
 )
@@ -10,7 +11,7 @@ type middleware func(http.HandlerFunc) http.HandlerFunc
 type router struct {
 	handlersGET         map[string]http.HandlerFunc
 	handlersPOST        map[string]http.HandlerFunc
-	middlewareFunctions []middleware
+	middlewareFunctions *list.List
 
 	rwMu sync.RWMutex
 }
@@ -19,7 +20,13 @@ func NewRouter() *router {
 	return &router{
 		handlersGET:         make(map[string]http.HandlerFunc),
 		handlersPOST:        make(map[string]http.HandlerFunc),
-		middlewareFunctions: []middleware{},
+		middlewareFunctions: list.New(),
+	}
+}
+
+func (r *router) lazyInitMiddlewareFunctions() {
+	if r.middlewareFunctions == nil {
+		r.middlewareFunctions = list.New()
 	}
 }
 
@@ -45,15 +52,17 @@ func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	for _, m := range r.middlewareFunctions {
-		fn = m(fn)
+	for e := r.middlewareFunctions.Back(); e != nil; e = e.Prev() {
+		fn = e.Value.(middleware)(fn)
 	}
 
 	fn(w, req)
 }
 
 // TODO: 重複の対応
-func (r *router) SetMiddleware(m middleware) *router {
+func (r *router) PushBackMiddleware(m middleware) *router {
+	r.lazyInitMiddlewareFunctions()
+
 	r.rwMu.Lock()
 	defer r.rwMu.Unlock()
 
@@ -61,7 +70,7 @@ func (r *router) SetMiddleware(m middleware) *router {
 		return r
 	}
 
-	r.middlewareFunctions = append(r.middlewareFunctions, m)
+	r.middlewareFunctions.PushBack(m)
 	return r
 }
 
