@@ -1,8 +1,14 @@
 package handler
 
-import "net/http"
+import (
+	"context"
+	"net/http"
+)
 
-type HandlerInput struct{}
+type HandlerInput struct {
+	context.Context
+	Body []byte
+}
 
 type HandlerOutput struct {
 	StatusCode int
