@@ -37,7 +37,7 @@ func (r *router) handlers(method string) map[string]http.HandlerFunc {
 	case http.MethodPost:
 		return r.handlersPOST
 	default:
-		return nil
+		panic("invalid method")
 	}
 }
 
