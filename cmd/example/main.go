@@ -20,7 +20,7 @@ func init() {
 }
 
 func run() error {
-	db, err := rdb.NewDB()
+	db, err := rdb.NewDBXorm()
 	if err != nil {
 		return err
 	}

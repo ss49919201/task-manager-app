@@ -19,7 +19,7 @@ func usecaseMiddlewarefunc(f http.HandlerFunc) http.HandlerFunc {
 	)
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		db, err := rdb.NewDB()
+		db, err := rdb.NewDBXorm()
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to connect to database")
 		}

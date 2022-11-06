@@ -1,15 +1,24 @@
 package rdb
 
 import (
-	"fmt"
+	"database/sql"
 	"os"
 
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 	"xorm.io/xorm"
 	"xorm.io/xorm/log"
 )
 
-func NewDB() (*xorm.Engine, error) {
+func NewDB() (*sql.DB, error) {
+	db, err := sql.Open("mysql", getDataSourceName())
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func NewDBXorm() (*xorm.Engine, error) {
 	engine, err := xorm.NewEngine("mysql", getDataSourceName())
 	if err != nil {
 		return nil, err
@@ -24,11 +33,11 @@ func NewDB() (*xorm.Engine, error) {
 }
 
 func getDataSourceName() string {
-	// Set data source name
-	dbHost := os.Getenv("DATABASE_HOST")
-	dbPort := os.Getenv("DATABASE_PORT")
-	dbUser := os.Getenv("DATABASE_USER")
-	dbPass := os.Getenv("DATABASE_PASS")
-	dbName := os.Getenv("DATABASE_NAME")
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
+	cnf := mysql.Config{
+		User:   os.Getenv("DATABASE_USER"),
+		Passwd: os.Getenv("DATABASE_PASSWORD"),
+		Addr:   os.Getenv("DATABASE_HOST"),
+		DBName: os.Getenv("DATABASE_NAME"),
+	}
+	return cnf.FormatDSN()
 }
