@@ -2,8 +2,10 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/s-beats/rest-todo/infra/rdb"
 )
 
@@ -22,14 +24,15 @@ func CreateUser(input *HandlerInput) *HandlerOutput {
 	}
 
 	var u userInput
-	if err := json.Unmarshal(input.Body, &u); err != nil {
+	decoder := json.NewDecoder(input.Body)
+	if err := decoder.Decode(&u); err != nil {
 		return &HandlerOutput{
 			StatusCode: http.StatusBadRequest,
-			Body:       []byte(string(err.Error())),
+			Body:       []byte(string(fmt.Errorf("failed to decode input body: %w", err).Error())),
 		}
 	}
 
-	rows, err := db.QueryContext(input.Context, "INSERT INTO users (name) VALUES (?)", u.Name)
+	rows, err := db.QueryContext(input.Context, "INSERT INTO users (id, name) VALUES (?, ?)", uuid.New(), u.Name)
 	if err != nil {
 		return &HandlerOutput{
 			StatusCode: http.StatusInternalServerError,

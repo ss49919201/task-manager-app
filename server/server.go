@@ -11,7 +11,7 @@ import (
 
 func defineRoutes(router *router) {
 	router.Get("/users", handler.Wrap(handler.GetUserList))
-	router.Post("/users", handler.Wrap(handler.GetUserList))
+	router.Post("/users", handler.Wrap(handler.CreateUser))
 }
 
 func Start() error {
