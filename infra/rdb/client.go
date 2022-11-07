@@ -2,7 +2,6 @@ package rdb
 
 import (
 	"database/sql"
-	"fmt"
 	"os"
 	"time"
 
@@ -37,15 +36,12 @@ func NewDBXorm() (*xorm.Engine, error) {
 func getDataSourceName() string {
 	cnf := mysql.Config{
 		Net:       "tcp",
-		Addr:      "127.0.0.1:3306",
-		DBName:    "database",
-		Collation: "utf8mb4_general_ci",
-		Loc:       time.UTC,
+		Addr:      os.Getenv("DATABASE_HOST"),
 		User:      os.Getenv("DATABASE_USER"),
 		Passwd:    os.Getenv("DATABASE_PASSWORD"),
-		// Addr:   os.Getenv("DATABASE_HOST"),
-		// DBName: os.Getenv("DATABASE_NAME"),
+		DBName:    os.Getenv("DATABASE_NAME"),
+		Loc:       time.UTC,
+		Collation: "utf8mb4_general_ci",
 	}
-	fmt.Println(cnf.FormatDSN())
 	return cnf.FormatDSN()
 }
