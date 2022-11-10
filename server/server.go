@@ -9,7 +9,7 @@ import (
 	"github.com/s-beats/rest-todo/log"
 )
 
-func defineRoutes(router *router) {
+func defineRoutes(router Router) {
 	router.Get("/users", handler.Wrap(handler.GetUserList))
 	router.Post("/users", handler.Wrap(handler.CreateUser))
 }

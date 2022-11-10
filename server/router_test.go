@@ -150,7 +150,7 @@ func Test_router_middlware(t *testing.T) {
 
 func Test_router_PushBackMiddleware(t *testing.T) {
 	testFn := middleware(func(f http.HandlerFunc) http.HandlerFunc { return f })
-	hasTestFnRouter := NewRouter()
+	hasTestFnRouter := newRouter()
 	hasTestFnRouter.middlewareFunctions.PushBack(testFn)
 
 	type fields struct {
@@ -185,8 +185,8 @@ func Test_router_PushBackMiddleware(t *testing.T) {
 			r := &router{
 				middlewareFunctions: tt.fields.middlewareFunctions,
 			}
-			got := r.PushBackMiddleware(tt.args.m)
-			assert.Equal(t, tt.want.middlewareFunctions.Len(), got.middlewareFunctions.Len())
+			_ = r.PushBackMiddleware(tt.args.m)
+			assert.Equal(t, tt.want.middlewareFunctions.Len(), r.middlewareFunctions.Len())
 		})
 	}
 }

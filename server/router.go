@@ -6,6 +6,13 @@ import (
 	"sync"
 )
 
+type Router interface {
+	ServeHTTP(w http.ResponseWriter, req *http.Request)
+	Get(pattern string, fn http.HandlerFunc)
+	Post(pattern string, fn http.HandlerFunc)
+	PushBackMiddleware(m middleware) Router
+}
+
 type middleware func(http.HandlerFunc) http.HandlerFunc
 
 type router struct {
@@ -16,7 +23,11 @@ type router struct {
 	rwMu sync.RWMutex
 }
 
-func NewRouter() *router {
+func NewRouter() Router {
+	return newRouter()
+}
+
+func newRouter() *router {
 	return &router{
 		handlersGET:         make(map[string]http.HandlerFunc),
 		handlersPOST:        make(map[string]http.HandlerFunc),
@@ -60,7 +71,7 @@ func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 // TODO: 重複の対応
-func (r *router) PushBackMiddleware(m middleware) *router {
+func (r *router) PushBackMiddleware(m middleware) Router {
 	r.lazyInitMiddlewareFunctions()
 
 	r.rwMu.Lock()
