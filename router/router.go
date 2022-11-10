@@ -1,19 +1,12 @@
-package server
+package router
 
 import (
 	"container/list"
 	"net/http"
 	"sync"
+
+	"github.com/s-beats/rest-todo/server"
 )
-
-type Router interface {
-	ServeHTTP(w http.ResponseWriter, req *http.Request)
-	Get(pattern string, fn http.HandlerFunc)
-	Post(pattern string, fn http.HandlerFunc)
-	PushBackMiddleware(m middleware) Router
-}
-
-type middleware func(http.HandlerFunc) http.HandlerFunc
 
 type router struct {
 	handlersGET         map[string]http.HandlerFunc
@@ -23,7 +16,7 @@ type router struct {
 	rwMu sync.RWMutex
 }
 
-func NewRouter() Router {
+func NewRouter() *router {
 	return newRouter()
 }
 
@@ -64,14 +57,14 @@ func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	for e := r.middlewareFunctions.Back(); e != nil; e = e.Prev() {
-		fn = e.Value.(middleware)(fn)
+		fn = e.Value.(server.Middleware)(fn)
 	}
 
 	fn(w, req)
 }
 
 // TODO: 重複の対応
-func (r *router) PushBackMiddleware(m middleware) Router {
+func (r *router) PushBackMiddleware(m server.Middleware) server.Router {
 	r.lazyInitMiddlewareFunctions()
 
 	r.rwMu.Lock()

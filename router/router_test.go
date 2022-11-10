@@ -1,4 +1,4 @@
-package server
+package router
 
 import (
 	"bytes"
@@ -149,7 +149,7 @@ func Test_router_middlware(t *testing.T) {
 }
 
 func Test_router_PushBackMiddleware(t *testing.T) {
-	testFn := middleware(func(f http.HandlerFunc) http.HandlerFunc { return f })
+	testFn := func(f http.HandlerFunc) http.HandlerFunc { return f }
 	hasTestFnRouter := newRouter()
 	hasTestFnRouter.middlewareFunctions.PushBack(testFn)
 
@@ -157,7 +157,7 @@ func Test_router_PushBackMiddleware(t *testing.T) {
 		middlewareFunctions *list.List
 	}
 	type args struct {
-		m middleware
+		m func(f http.HandlerFunc) http.HandlerFunc
 	}
 	tests := []struct {
 		name   string

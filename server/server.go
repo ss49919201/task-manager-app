@@ -9,16 +9,24 @@ import (
 	"github.com/s-beats/rest-todo/log"
 )
 
+type Middleware func(http.HandlerFunc) http.HandlerFunc
+
+type Router interface {
+	ServeHTTP(w http.ResponseWriter, req *http.Request)
+	Get(pattern string, fn http.HandlerFunc)
+	Post(pattern string, fn http.HandlerFunc)
+	PushBackMiddleware(m Middleware) Router
+}
+
 func defineRoutes(router Router) {
 	router.Get("/users", handler.Wrap(handler.GetUserList))
 	router.Post("/users", handler.Wrap(handler.CreateUser))
 }
 
-func Start() error {
+func Start(router Router) error {
 	host := os.Getenv("HOST")
 	port := os.Getenv("PORT")
 
-	router := NewRouter()
 	defineRoutes(router)
 
 	log.Info().Msgf("Starting server on %s:%s", host, port)
