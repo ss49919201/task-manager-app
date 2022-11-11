@@ -87,7 +87,7 @@ func GetUserList(input *HandlerInput) *HandlerOutput {
 	}
 
 	return &HandlerOutput{
-		StatusCode: http.StatusCreated,
+		StatusCode: http.StatusOK,
 		Body:       b,
 	}
 }
