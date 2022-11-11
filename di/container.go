@@ -26,6 +26,9 @@ func NewContainer(db *xorm.Engine) *Container {
 			do.New(),
 		}
 
+		// db
+		do.ProvideValue(container.Injector, db)
+
 		// repository
 		do.ProvideValue(container.Injector, persistence.NewUser(db))
 		do.ProvideValue(container.Injector, persistence.NewTask(db))

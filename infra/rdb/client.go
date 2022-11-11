@@ -35,13 +35,14 @@ func NewDBXorm() (*xorm.Engine, error) {
 
 func getDataSourceName() string {
 	cnf := mysql.Config{
-		Net:       "tcp",
-		Addr:      os.Getenv("DATABASE_HOST"),
-		User:      os.Getenv("DATABASE_USER"),
-		Passwd:    os.Getenv("DATABASE_PASSWORD"),
-		DBName:    os.Getenv("DATABASE_NAME"),
-		Loc:       time.UTC,
-		Collation: "utf8mb4_general_ci",
+		Net:                  "tcp",
+		Addr:                 os.Getenv("DATABASE_HOST"),
+		User:                 os.Getenv("DATABASE_USER"),
+		Passwd:               os.Getenv("DATABASE_PASSWORD"),
+		DBName:               os.Getenv("DATABASE_NAME"),
+		Loc:                  time.UTC,
+		Collation:            "utf8mb4_general_ci",
+		AllowNativePasswords: true,
 	}
 	return cnf.FormatDSN()
 }
