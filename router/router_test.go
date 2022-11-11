@@ -116,18 +116,19 @@ func Test_router_middlware(t *testing.T) {
 	r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("/" + strconv.Itoa(2)))
 	})
-	r.PushBackMiddleware(func(next http.HandlerFunc) http.HandlerFunc {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte(strconv.Itoa(1)))
-			next.ServeHTTP(w, r)
+	r.
+		PushBackMiddleware(func(next http.HandlerFunc) http.HandlerFunc {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte(strconv.Itoa(1)))
+				next.ServeHTTP(w, r)
+			})
+		}).
+		PushBackMiddleware(func(next http.HandlerFunc) http.HandlerFunc {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				next.ServeHTTP(w, r)
+				w.Write([]byte("/" + strconv.Itoa(3)))
+			})
 		})
-	})
-	r.PushBackMiddleware(func(next http.HandlerFunc) http.HandlerFunc {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			next.ServeHTTP(w, r)
-			w.Write([]byte("/" + strconv.Itoa(3)))
-		})
-	})
 
 	testServer := httptest.NewServer(r)
 	defer testServer.Close()
