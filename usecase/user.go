@@ -23,7 +23,7 @@ func NewUser(userRepo repository.User) User {
 }
 
 func (u *user) Create(ctx context.Context, name string) (*domain.User, error) {
-	wrappedSave := util.ConvMapperWithCtx(ctx, u.userRepository.Save)
+	wrappedSave := util.ConvertMapperWithCtx(ctx, u.userRepository.Save)
 
 	result := domain.NewUser(domain.NewUserID(util.NewUUID()), name).FlatMap(wrappedSave)
 	if result.Error() != nil {

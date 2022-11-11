@@ -26,7 +26,7 @@ func NewTask(taskService service.Task, taskRepository repository.Task) Task {
 }
 
 func (t *task) Create(ctx context.Context, title, text, userID, priority string) (*domain.Task, error) {
-	wappedSave := util.ConvMapperWithCtx(ctx, t.taskRepository.Save)
+	wappedSave := util.ConvertMapperWithCtx(ctx, t.taskRepository.Save)
 
 	result := t.taskService.CreateTaskByUser(ctx, title, text, userID, priority).FlatMap(wappedSave)
 	if result.Error() != nil {
