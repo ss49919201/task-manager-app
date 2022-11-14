@@ -16,7 +16,7 @@ exec-mysql: dc-up
 
 .PHONY: init-db
 init-db: dc-up
-	docker container exec mysql sh /var/script/init_db.sh
+	docker container exec mysql sh /var/script/mysql/init_db.sh
 
 .PHONY: test
 test:
