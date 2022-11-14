@@ -1,4 +1,4 @@
-package domain
+package model
 
 import (
 	"github.com/s-beats/rest-todo/util"
