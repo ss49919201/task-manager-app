@@ -12,33 +12,33 @@ var (
 	syncOnce sync.Once
 )
 
-func setup() {
+func lazyInit() {
 	syncOnce.Do(func() {
 		logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
 	})
 }
 
+func setupLogger(callback func() *zerolog.Event) *zerolog.Event {
+	lazyInit()
+	return callback()
+}
+
 func Fatal() *zerolog.Event {
-	setup()
-	return logger.Fatal()
+	return setupLogger(logger.Fatal)
 }
 
 func Error() *zerolog.Event {
-	setup()
-	return logger.Error()
+	return setupLogger(logger.Error)
 }
 
 func Warn() *zerolog.Event {
-	setup()
-	return logger.Warn()
+	return setupLogger(logger.Warn)
 }
 
 func Debug() *zerolog.Event {
-	setup()
-	return logger.Debug()
+	return setupLogger(logger.Debug)
 }
 
 func Info() *zerolog.Event {
-	setup()
-	return logger.Info()
+	return setupLogger(logger.Info)
 }
