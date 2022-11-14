@@ -18,9 +18,9 @@ func lazyInit() {
 	})
 }
 
-func setup(callback func() *zerolog.Event) *zerolog.Event {
+func setup(cb func() *zerolog.Event) *zerolog.Event {
 	lazyInit()
-	return callback()
+	return cb()
 }
 
 func Fatal() *zerolog.Event {
