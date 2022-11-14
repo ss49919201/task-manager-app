@@ -9,11 +9,12 @@ import (
 )
 
 type router struct {
-	handlersGET         map[string]http.HandlerFunc
-	handlersPOST        map[string]http.HandlerFunc
-	middlewareFunctions *list.List
+	handlerRWMu  sync.RWMutex
+	handlersGET  map[string]http.HandlerFunc
+	handlersPOST map[string]http.HandlerFunc
 
-	rwMu sync.RWMutex
+	middlewareRWMu      sync.RWMutex
+	middlewareFunctions *list.List
 }
 
 func NewRouter() *router {
@@ -25,12 +26,6 @@ func newRouter() *router {
 		handlersGET:         make(map[string]http.HandlerFunc),
 		handlersPOST:        make(map[string]http.HandlerFunc),
 		middlewareFunctions: list.New(),
-	}
-}
-
-func (r *router) lazyInitMiddlewareFunctions() {
-	if r.middlewareFunctions == nil {
-		r.middlewareFunctions = list.New()
 	}
 }
 
@@ -46,8 +41,10 @@ func (r *router) handlers(method string) map[string]http.HandlerFunc {
 }
 
 func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	r.rwMu.RLock()
-	defer r.rwMu.RUnlock()
+	r.handlerRWMu.RLock()
+	defer r.handlerRWMu.RUnlock()
+	r.middlewareRWMu.RLock()
+	defer r.middlewareRWMu.RUnlock()
 
 	handlers := r.handlers(req.Method)
 	fn, ok := handlers[req.URL.Path]
@@ -65,10 +62,8 @@ func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 // TODO: 重複の対応
 func (r *router) PushBackMiddleware(m server.Middleware) server.Router {
-	r.lazyInitMiddlewareFunctions()
-
-	r.rwMu.Lock()
-	defer r.rwMu.Unlock()
+	r.middlewareRWMu.Lock()
+	defer r.middlewareRWMu.Unlock()
 
 	if m == nil {
 		return r
@@ -78,16 +73,16 @@ func (r *router) PushBackMiddleware(m server.Middleware) server.Router {
 	return r
 }
 
-func (r *router) Get(pattern string, fn http.HandlerFunc) {
-	r.rwMu.Lock()
-	defer r.rwMu.Unlock()
+func (r *router) GET(pattern string, fn http.HandlerFunc) {
+	r.handlerRWMu.Lock()
+	defer r.handlerRWMu.Unlock()
 
 	r.handlersGET[pattern] = fn
 }
 
-func (r *router) Post(pattern string, fn http.HandlerFunc) {
-	r.rwMu.Lock()
-	defer r.rwMu.Unlock()
+func (r *router) POST(pattern string, fn http.HandlerFunc) {
+	r.handlerRWMu.Lock()
+	defer r.handlerRWMu.Unlock()
 
 	r.handlersPOST[pattern] = fn
 }

@@ -13,14 +13,14 @@ type Middleware func(http.HandlerFunc) http.HandlerFunc
 
 type Router interface {
 	ServeHTTP(w http.ResponseWriter, req *http.Request)
-	Get(pattern string, fn http.HandlerFunc)
-	Post(pattern string, fn http.HandlerFunc)
+	GET(pattern string, fn http.HandlerFunc)
+	POST(pattern string, fn http.HandlerFunc)
 	PushBackMiddleware(m Middleware) Router
 }
 
 func defineRoutes(router Router) {
-	router.Get("/users", handler.Wrap(handler.GetUserList))
-	router.Post("/users", handler.Wrap(handler.CreateUser))
+	router.GET("/users", handler.Wrap(handler.GetUserList))
+	router.POST("/users", handler.Wrap(handler.CreateUser))
 }
 
 func Start(router Router) error {

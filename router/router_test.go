@@ -15,7 +15,7 @@ import (
 
 func Test_router(t *testing.T) {
 	r := NewRouter()
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	r.GET("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Hello", "Hello, World!")
 		w.Write([]byte("Hello, World!"))
 		w.WriteHeader(http.StatusOK)
@@ -36,7 +36,7 @@ func Test_router(t *testing.T) {
 
 func Test_router_GET(t *testing.T) {
 	r := NewRouter()
-	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+	r.GET("/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("pong"))
 		w.WriteHeader(http.StatusOK)
 	})
@@ -73,7 +73,7 @@ func Test_router_GET(t *testing.T) {
 
 func Test_router_POST(t *testing.T) {
 	r := NewRouter()
-	r.Post("/test", func(w http.ResponseWriter, r *http.Request) {
+	r.POST("/test", func(w http.ResponseWriter, r *http.Request) {
 		b, err := io.ReadAll(r.Body)
 		assert.NoError(t, err)
 		w.Write([]byte("success: " + string(b)))
@@ -113,7 +113,7 @@ func Test_router_POST(t *testing.T) {
 func Test_router_middlware(t *testing.T) {
 	r := NewRouter()
 	// 1,2,3
-	r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
+	r.GET("/test", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("/" + strconv.Itoa(2)))
 	})
 	r.
