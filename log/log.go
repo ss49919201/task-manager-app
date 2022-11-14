@@ -18,27 +18,27 @@ func lazyInit() {
 	})
 }
 
-func setupLogger(callback func() *zerolog.Event) *zerolog.Event {
+func setup(callback func() *zerolog.Event) *zerolog.Event {
 	lazyInit()
 	return callback()
 }
 
 func Fatal() *zerolog.Event {
-	return setupLogger(logger.Fatal)
+	return setup(logger.Fatal)
 }
 
 func Error() *zerolog.Event {
-	return setupLogger(logger.Error)
+	return setup(logger.Error)
 }
 
 func Warn() *zerolog.Event {
-	return setupLogger(logger.Warn)
+	return setup(logger.Warn)
 }
 
 func Debug() *zerolog.Event {
-	return setupLogger(logger.Debug)
+	return setup(logger.Debug)
 }
 
 func Info() *zerolog.Event {
-	return setupLogger(logger.Info)
+	return setup(logger.Info)
 }
