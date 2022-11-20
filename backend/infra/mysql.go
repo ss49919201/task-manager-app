@@ -1,4 +1,4 @@
-package rdb
+package infra
 
 import (
 	"database/sql"

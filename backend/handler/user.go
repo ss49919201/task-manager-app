@@ -7,7 +7,9 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/s-beats/rest-todo/infra/rdb"
+	"github.com/s-beats/rest-todo/di"
+	"github.com/s-beats/rest-todo/infra"
+	"github.com/samber/do"
 )
 
 var db *sql.DB
@@ -15,7 +17,7 @@ var db *sql.DB
 func lazyInitDB() *sql.DB {
 	if db == nil {
 		var err error
-		db, err = rdb.NewDB()
+		db, err = infra.NewDB()
 		if err != nil {
 			panic(err)
 		}
@@ -37,7 +39,7 @@ func CreateUser(input *HandlerInput) *HandlerOutput {
 		}
 	}
 
-	db := lazyInitDB()
+	db := do.MustInvoke[*sql.DB](di.NewContainer().Injector)
 	if _, err := db.QueryContext(input.Context, "INSERT INTO users (id, name) VALUES (?, ?)", uuid.New(), u.Name); err != nil {
 		return &HandlerOutput{
 			StatusCode: http.StatusInternalServerError,
@@ -52,7 +54,7 @@ func CreateUser(input *HandlerInput) *HandlerOutput {
 }
 
 func GetUserList(input *HandlerInput) *HandlerOutput {
-	db := lazyInitDB()
+	db := do.MustInvoke[*sql.DB](di.NewContainer().Injector)
 	rows, err := db.QueryContext(input.Context, "SELECT id, name FROM users")
 	if err != nil {
 		return &HandlerOutput{
