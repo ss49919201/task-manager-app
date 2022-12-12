@@ -8,31 +8,27 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/s-beats/rest-todo/di"
-	"github.com/s-beats/rest-todo/infra"
 	"github.com/samber/do"
 )
 
-var db *sql.DB
-
-func lazyInitDB() *sql.DB {
-	if db == nil {
-		var err error
-		db, err = infra.NewDB()
-		if err != nil {
-			panic(err)
-		}
+type (
+	createUserInput struct {
+		Name string `json:"name"`
 	}
-	return db
-}
-
-func CreateUser(input *HandlerInput) *HandlerOutput {
-	type userInput struct {
+	updateUserInput struct {
 		Name string `json:"name"`
 	}
 
-	var u userInput
+	rowUser struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	}
+)
+
+func CreateUser(input *HandlerInput) *HandlerOutput {
+	var createInput createUserInput
 	decoder := json.NewDecoder(input.Body)
-	if err := decoder.Decode(&u); err != nil {
+	if err := decoder.Decode(&createInput); err != nil {
 		return &HandlerOutput{
 			StatusCode: http.StatusBadRequest,
 			Body:       []byte(string(fmt.Errorf("failed to decode input body: %w", err).Error())),
@@ -40,7 +36,72 @@ func CreateUser(input *HandlerInput) *HandlerOutput {
 	}
 
 	db := do.MustInvoke[*sql.DB](di.NewContainer().Injector)
-	if _, err := db.QueryContext(input.Context, "INSERT INTO users (id, name) VALUES (?, ?)", uuid.New(), u.Name); err != nil {
+	if _, err := db.QueryContext(input.Context, "INSERT INTO users (id, name) VALUES (?, ?)", uuid.New(), createInput.Name); err != nil {
+		return &HandlerOutput{
+			StatusCode: http.StatusInternalServerError,
+			Body:       []byte(string(err.Error())),
+		}
+	}
+
+	return &HandlerOutput{
+		StatusCode: http.StatusCreated,
+		Body:       []byte("null"),
+	}
+}
+
+func UpdateUser(input *HandlerInput) *HandlerOutput {
+	id := input.URL.Path[len("/users/"):]
+
+	var updateInput updateUserInput
+	decoder := json.NewDecoder(input.Body)
+	if err := decoder.Decode(&updateInput); err != nil {
+		return &HandlerOutput{
+			StatusCode: http.StatusBadRequest,
+			Body:       []byte(string(fmt.Errorf("failed to decode input body: %w", err).Error())),
+		}
+	}
+
+	db := do.MustInvoke[*sql.DB](di.NewContainer().Injector)
+	tx, err := db.BeginTx(input.Context, nil)
+	if err != nil {
+		return &HandlerOutput{
+			StatusCode: http.StatusInternalServerError,
+			Body:       []byte(string(err.Error())),
+		}
+	}
+
+	rows, err := tx.QueryContext(input.Context, "SELECT id, name FROM users FOR UPDATE")
+	if err != nil {
+		return &HandlerOutput{
+			StatusCode: http.StatusInternalServerError,
+			Body:       []byte(string(err.Error())),
+		}
+	}
+	defer rows.Close()
+
+	user := &rowUser{}
+	if rows.Next() {
+		if err := rows.Scan(&user.ID, &user.Name); err != nil {
+			return &HandlerOutput{
+				StatusCode: http.StatusInternalServerError,
+				Body:       []byte(string(err.Error())),
+			}
+		}
+	} else {
+		return &HandlerOutput{
+			StatusCode: http.StatusNotFound,
+			Body:       []byte("null"),
+		}
+	}
+
+	if _, err := tx.QueryContext(input.Context, "UPDATE users SET name = ? WHERE id = ?", updateInput.Name, id); err != nil {
+		return &HandlerOutput{
+			StatusCode: http.StatusInternalServerError,
+			Body:       []byte(string(err.Error())),
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
 		return &HandlerOutput{
 			StatusCode: http.StatusInternalServerError,
 			Body:       []byte(string(err.Error())),
@@ -64,10 +125,6 @@ func GetUserList(input *HandlerInput) *HandlerOutput {
 	}
 	defer rows.Close()
 
-	type rowUser struct {
-		ID   string `json:"id"`
-		Name string `json:"name"`
-	}
 	users := []*rowUser{}
 	for rows.Next() {
 		u := &rowUser{}
