@@ -18,7 +18,7 @@ func NewDB() (*sql.DB, error) {
 }
 
 func getDataSourceName() string {
-	cnf := mysql.Config{
+	return (&mysql.Config{
 		Net:                  "tcp",
 		Addr:                 os.Getenv("DATABASE_HOST"),
 		User:                 os.Getenv("DATABASE_USER"),
@@ -27,6 +27,5 @@ func getDataSourceName() string {
 		Loc:                  time.UTC,
 		Collation:            "utf8mb4_general_ci",
 		AllowNativePasswords: true,
-	}
-	return cnf.FormatDSN()
+	}).FormatDSN()
 }
