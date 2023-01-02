@@ -19,6 +19,8 @@ function executeDML() {
     mysql -u root database < /var/dml/master.dml
 }
 
+# execute
+# TODO: implement CreateUser
 createDatabase
 executeDDL
 executeDML
