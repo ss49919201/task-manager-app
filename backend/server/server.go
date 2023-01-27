@@ -30,6 +30,8 @@ func defineMiddlewares(router Router) {
 }
 
 func defineRoutes(router Router) {
+	router.GET("/health", handler.Wrap(handler.HealthCheck))
+
 	router.GET("/users", handler.Wrap(handler.GetUserList))
 	router.POST("/users", handler.Wrap(handler.CreateUser))
 }
